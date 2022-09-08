@@ -3,8 +3,10 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/saintox/go-basic-auth/controllers"
+	"github.com/saintox/go-basic-auth/middlewares"
 	"github.com/saintox/go-basic-auth/pkg/databases"
 	log "github.com/saintox/go-basic-auth/pkg/logger"
+	"github.com/saintox/go-basic-auth/repositories"
 	"github.com/saintox/go-basic-auth/services"
 )
 
@@ -23,15 +25,26 @@ func main() {
 		MaxLogSize:           0,
 	})
 
-	_, err := databases.CreateMySqlClient()
+	// db initialization
+	db, err := databases.CreateMySqlClient()
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Database connection failed")
 		panic(app)
 	}
 
-	ctl := controllers.NewController(services.NewService())
+	// repository, service, controller initialization
+	repo := repositories.NewRepository(db)
+	srv := services.NewService(repo)
+	validator := middlewares.NewValidator()
+	ctl := controllers.NewController(srv, validator, logger)
 
-	app.GET("/", ctl.Auth.Login)
+	auth := app.Group("auth")
+	auth.POST("/login", ctl.Auth.Login)
+
+	// ping route
+	app.GET("ping", func(c echo.Context) error {
+		return c.NoContent(200)
+	})
 
 	err = app.Start(":8000")
 	if err != nil {

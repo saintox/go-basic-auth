@@ -1,12 +1,15 @@
 package services
 
+import "github.com/saintox/go-basic-auth/repositories"
+
 type Service struct {
-	Login LoginService
-	//Register RegisterService
+	Login    LoginService
+	Register RegisterService
 }
 
-func NewService() *Service {
+func NewService(repository *repositories.Repository) *Service {
 	return &Service{
-		Login: NewLoginService(),
+		Login:    NewLoginService(repository),
+		Register: NewRegisterService(repository),
 	}
 }

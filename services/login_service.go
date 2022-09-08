@@ -13,9 +13,9 @@ type LoginServiceImpl struct {
 	UserRepo repositories.UserRepository
 }
 
-func NewLoginService() *LoginServiceImpl {
+func NewLoginService(repository *repositories.Repository) *LoginServiceImpl {
 	return &LoginServiceImpl{
-		//UserRepo:
+		UserRepo: repository.User,
 	}
 }
 
