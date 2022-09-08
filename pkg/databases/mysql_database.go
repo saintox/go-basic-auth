@@ -1,8 +1,10 @@
 package databases
 
 import (
+	"context"
 	"fmt"
 	"github.com/joho/godotenv"
+	"github.com/saintox/go-basic-auth/entities"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -13,6 +15,7 @@ func CreateMySqlClient() (*gorm.DB, error) {
 	var (
 		connection *gorm.DB
 		err        error
+		ctx        context.Context
 	)
 
 	err = godotenv.Load(".env")
@@ -32,6 +35,16 @@ func CreateMySqlClient() (*gorm.DB, error) {
 		Logger: logger.Default.LogMode(logger.Error),
 	}); err != nil {
 		return nil, err
+	}
+
+	// migrate model
+	migrateModels := []interface{}{
+		&entities.User{},
+	}
+
+	tx := connection.WithContext(ctx)
+	if err = tx.AutoMigrate(migrateModels...); err != nil {
+		return connection, err
 	}
 
 	return connection, err
