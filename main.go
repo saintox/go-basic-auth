@@ -40,6 +40,7 @@ func main() {
 
 	auth := app.Group("auth")
 	auth.POST("/login", ctl.Auth.Login)
+	auth.POST("/register", ctl.Auth.Register)
 
 	// ping route
 	app.GET("ping", func(c echo.Context) error {

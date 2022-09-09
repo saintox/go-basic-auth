@@ -6,7 +6,8 @@ import (
 )
 
 type UserRepository interface {
-	FindByEmail(email string) (user entities.User, err error)
+	FindByEmail(email string) (entities.User, error)
+	CreateUser(data *entities.User) (*entities.User, error)
 }
 
 type UserRepositoryImpl struct {
@@ -27,4 +28,13 @@ func (u UserRepositoryImpl) FindByEmail(email string) (user entities.User, err e
 	}
 
 	return user, nil
+}
+
+func (u UserRepositoryImpl) CreateUser(data *entities.User) (createdUser *entities.User, err error) {
+	create := u.db.Create(data)
+	if create.Error != nil {
+		return createdUser, create.Error
+	}
+
+	return data, nil
 }

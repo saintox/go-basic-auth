@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/saintox/go-basic-auth/constants"
 	"github.com/saintox/go-basic-auth/dtos"
+	"github.com/saintox/go-basic-auth/entities"
 	"github.com/saintox/go-basic-auth/middlewares"
 	"github.com/saintox/go-basic-auth/pkg/logger"
 	"github.com/saintox/go-basic-auth/services"
@@ -53,6 +54,30 @@ func (ctl AuthControllerImpl) Login(ctx echo.Context) (err error) {
 	return ctx.JSON(http.StatusOK, check)
 }
 
-func (ctl AuthControllerImpl) Register(ctx echo.Context) error {
-	return ctx.String(200, "Register route")
+func (ctl AuthControllerImpl) Register(ctx echo.Context) (err error) {
+	var requestParam dtos.RegisterRequestBody
+
+	if err = ctx.Bind(&requestParam); err != nil {
+		data := dtos.NewResponse(http.StatusBadRequest, constants.FailedParseRequest, err, ctl.logger)
+		return ctx.JSON(http.StatusBadRequest, data)
+	}
+
+	if err = ctl.validator.Validate(&requestParam); err != nil {
+		data := dtos.NewResponse(http.StatusUnprocessableEntity, constants.ValidationError, err, ctl.logger)
+		return ctx.JSON(http.StatusUnprocessableEntity, data)
+	}
+
+	createUser := &entities.User{
+		Name:     requestParam.Name,
+		Email:    requestParam.Email,
+		Password: requestParam.Password,
+	}
+
+	create, err := ctl.service.Register.UserRegister(createUser)
+	if err != nil {
+		data := dtos.NewResponse(http.StatusBadRequest, constants.FailedParseRequest, err, ctl.logger)
+		return ctx.JSON(http.StatusBadRequest, data)
+	}
+
+	return ctx.JSON(http.StatusCreated, create)
 }
