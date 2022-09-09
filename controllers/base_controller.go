@@ -10,7 +10,7 @@ type Controller struct {
 	Auth AuthController
 }
 
-func NewController(service *services.Service, validator *middlewares.Validator, logger *logger.Logger) *Controller {
+func NewController(service *services.Service, validator *middlewares.CustomValidator, logger *logger.Logger) *Controller {
 	return &Controller{
 		Auth: NewAuthController(service, validator, logger),
 	}
