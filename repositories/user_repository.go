@@ -1,12 +1,12 @@
 package repositories
 
 import (
-	"context"
+	"github.com/saintox/go-basic-auth/entities"
 	"gorm.io/gorm"
 )
 
 type UserRepository interface {
-	FindByID(ctx context.Context, ID string)
+	FindByEmail(email string) (user entities.User, err error)
 }
 
 type UserRepositoryImpl struct {
@@ -19,6 +19,12 @@ func NewUserRepository(db *gorm.DB) *UserRepositoryImpl {
 	}
 }
 
-func (u UserRepositoryImpl) FindByID(ctx context.Context, ID string) {
-	//
+func (u UserRepositoryImpl) FindByEmail(email string) (user entities.User, err error) {
+	result := u.db.First(&user, "email = ?", email)
+
+	if result.Error != nil && result.Error == gorm.ErrRecordNotFound {
+		return user, result.Error
+	}
+
+	return user, nil
 }
